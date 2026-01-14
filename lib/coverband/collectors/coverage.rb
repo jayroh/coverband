@@ -54,9 +54,9 @@ module Coverband
         @semaphore.synchronize do
           raise "no Coverband store set" unless @store
 
-          files_with_line_usage = filtered_files(Delta.results)
+          @files_with_line_usage = filtered_files(Delta.results)
           if @store.type == Coverband::EAGER_TYPE && Coverband.configuration.defer_eager_loading_data?
-            @deferred_eager_loading_data = files_with_line_usage
+            @deferred_eager_loading_data = @files_with_line_usage
           else
             if @deferred_eager_loading_data && Coverband.configuration.defer_eager_loading_data?
               toggle_eager_loading do
@@ -64,11 +64,11 @@ module Coverband
                 @deferred_eager_loading_data = nil
               end
             end
-            @store.save_report(files_with_line_usage)
+            @store.save_report(@files_with_line_usage)
           end
         end
       rescue => e
-        @logger&.error files_with_line_usage.to_json
+        @logger&.error @files_with_line_usage.to_json
         @logger&.error "coverage failed to store"
         @logger&.error "Coverband Error: #{e.inspect} #{e.message}"
         e.backtrace.each { |line| @logger&.error line } if @verbose
