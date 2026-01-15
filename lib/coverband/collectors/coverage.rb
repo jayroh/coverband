@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "sentry-ruby"
 require "singleton"
 require_relative "delta"
 
@@ -68,7 +69,7 @@ module Coverband
           end
         end
       rescue => e
-        @logger&.error @files_with_line_usage.to_json
+        Sentry.capture_exception(e)
         @logger&.error "coverage failed to store"
         @logger&.error "Coverband Error: #{e.inspect} #{e.message}"
         e.backtrace.each { |line| @logger&.error line } if @verbose
